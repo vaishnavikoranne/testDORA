@@ -2,27 +2,48 @@
 name: Build and Deploy Pipeline
 
 on:
+  push:
+    branches: [main]
   workflow_dispatch:
     inputs:
-        change_request_number:
-          description: "Existing Change Request (e.g., CHG0056789)"
-          required: true
-
+      run_target:
+        description: "Optional: choose which pipeline to run manually"
+        required: false
+        type: choice
+        options:
+          - build
+          - deploy
+      change_request_number:
+        description: "Existing Change Request (e.g., CHG0056789) (required for deploy)"
+        required: false
 
 env:
   CHANGE_REQUEST_NUMBER: ${{ github.event.inputs.change_request_number }}
 
 jobs:
   build:
+    name: Build Job
     runs-on: ubuntu-latest
+    # Run on push OR when manually dispatched with run_target=build (or no target given)
+    if: ${{ github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && github.event.inputs.run_target == 'build') }}
     steps:
       - uses: actions/checkout@v4
       - name: Build
         run: echo "Build step executing..."
 
   deploy:
+    name: Deploy Job
     runs-on: ubuntu-latest
-    needs: build
+    # Only run on manual dispatch with run_target=deploy
+    if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.run_target == 'deploy' }}
     steps:
+      - name: Validate input
+        run: |
+          if [ -z "${{ github.event.inputs.change_request_number }}" ]; then
+            echo "ERROR: change_request_number is required for deploy."
+            exit 1
+          fi
       - name: Deploy
-        run: echo "Deploy step executing..."
+        run: |
+          echo "Deploy step executing..."
+          echo "Using Change Request: $CHANGE_REQUEST_NUMBER"
