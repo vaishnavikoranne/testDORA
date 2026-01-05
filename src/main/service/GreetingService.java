@@ -5,6 +5,6 @@ import org.springframework.stereotype.Service;
 public class GreetingService {
   public String greet(String name) {
     if (name == null || name.isBlank()) return "Hello, World!";
-    return "Hello, " + name + "! Welcome to DORA metrics sample app.";
+    return "Hello, " + name + "! Welcome to TEST metrics sample app.";
   }
 }
