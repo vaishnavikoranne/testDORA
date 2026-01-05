@@ -3,6 +3,14 @@ name: Build and Deploy Pipeline
 
 on:
   workflow_dispatch:
+    inputs:
+        change_request_number:
+          description: "Existing Change Request (e.g., CHG0056789)"
+          required: true
+
+
+env:
+  CHANGE_REQUEST_NUMBER: ${{ github.event.inputs.change_request_number }}
 
 jobs:
   build:
